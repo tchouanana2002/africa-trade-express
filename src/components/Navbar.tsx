@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Search, Menu, User, ShoppingCart, LogOut } from "lucide-react";
+import { Search, Menu, User, ShoppingCart, LogOut, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { CartSheet } from "@/components/CartSheet";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,10 +55,13 @@ const Navbar = () => {
                 <span className="text-sm text-muted-foreground">
                   Welcome, {user.email}
                 </span>
-                <Button variant="outline" size="sm">
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Cart
-                </Button>
+                <Link to="/dashboard">
+                  <Button variant="outline" size="sm">
+                    <LayoutDashboard className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <CartSheet />
                 <Button variant="ghost" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
@@ -71,10 +75,7 @@ const Navbar = () => {
                     Sign In
                   </Button>
                 </Link>
-                <Button variant="outline" size="sm">
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Cart
-                </Button>
+                <CartSheet />
               </>
             )}
             <Button size="sm" className="bg-gradient-primary hover:opacity-90">
@@ -114,10 +115,15 @@ const Navbar = () => {
                     <div className="text-sm text-muted-foreground px-2 py-1">
                       Welcome, {user.email}
                     </div>
-                    <Button variant="outline" size="sm" className="justify-start">
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Cart
-                    </Button>
+                    <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" size="sm" className="justify-start w-full">
+                        <LayoutDashboard className="h-4 w-4 mr-2" />
+                        Dashboard
+                      </Button>
+                    </Link>
+                    <div className="px-2">
+                      <CartSheet />
+                    </div>
                     <Button variant="ghost" size="sm" className="justify-start" onClick={handleSignOut}>
                       <LogOut className="h-4 w-4 mr-2" />
                       Sign Out
@@ -131,10 +137,9 @@ const Navbar = () => {
                         Sign In
                       </Button>
                     </Link>
-                    <Button variant="outline" size="sm" className="justify-start">
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Cart
-                    </Button>
+                    <div className="px-2">
+                      <CartSheet />
+                    </div>
                   </>
                 )}
                 <Button size="sm" className="bg-gradient-primary hover:opacity-90">

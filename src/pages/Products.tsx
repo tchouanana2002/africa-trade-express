@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useCart } from '@/contexts/CartContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -14,6 +15,7 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
+  const { addToCart } = useCart();
 
   const categories = [
     'All Products',
@@ -241,7 +243,18 @@ const Products = () => {
                     <Button variant="outline" size="sm" className="flex-1">
                       View Details
                     </Button>
-                    <Button size="sm" className="flex-1 bg-gradient-primary hover:opacity-90">
+                    <Button 
+                      size="sm" 
+                      className="flex-1 bg-gradient-primary hover:opacity-90"
+                      onClick={() => addToCart({
+                        id: product.id,
+                        name: product.name,
+                        price: `$${product.price}`,
+                        image: product.image,
+                        vendor: product.vendor,
+                        category: product.category
+                      })}
+                    >
                       Add to Cart
                     </Button>
                   </div>

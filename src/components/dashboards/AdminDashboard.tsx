@@ -16,13 +16,13 @@ interface User {
   email: string;
   created_at: string;
   profiles: {
-    display_name: string;
-    first_name: string;
-    last_name: string;
-    avatar_url: string;
+    display_name: string | null;
+    first_name: string | null;
+    last_name: string | null;
+    avatar_url: string | null;
   };
   user_roles: {
-    role: string;
+    role: 'admin' | 'vendor' | 'customer' | 'delivery_agent';
   }[];
 }
 
@@ -51,45 +51,60 @@ const AdminDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch users with profiles and roles
-      const { data: usersData, error: usersError } = await supabase
-        .from('profiles')
-        .select(`
-          *,
-          user_roles(role)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (usersError) throw usersError;
-
-      // Transform data to include auth users
+      // Get auth users first
       const { data: authUsers } = await supabase.auth.admin.listUsers();
       
-      const enrichedUsers = usersData?.map(profile => {
-        const authUser = authUsers.users.find(u => u.id === profile.user_id);
-        return {
-          id: profile.user_id,
-          email: authUser?.email || '',
-          created_at: authUser?.created_at || '',
+      if (!authUsers?.users?.length) {
+        setUsers([]);
+        setStats({
+          totalUsers: 0,
+          totalVendors: 0,
+          totalCustomers: 0,
+          totalOrders: 0
+        });
+        return;
+      }
+
+      // Fetch profiles and roles for each user
+      const enrichedUsers: User[] = [];
+      
+      for (const authUser of authUsers.users) {
+        // Get profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', authUser.id)
+          .single();
+
+        // Get user roles
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', authUser.id);
+
+        enrichedUsers.push({
+          id: authUser.id,
+          email: authUser.email || '',
+          created_at: authUser.created_at || '',
           profiles: {
-            display_name: profile.display_name,
-            first_name: profile.first_name,
-            last_name: profile.last_name,
-            avatar_url: profile.avatar_url
+            display_name: profile?.display_name || null,
+            first_name: profile?.first_name || null,
+            last_name: profile?.last_name || null,
+            avatar_url: profile?.avatar_url || null
           },
-          user_roles: profile.user_roles || []
-        };
-      }) || [];
+          user_roles: userRoles || []
+        });
+      }
 
       setUsers(enrichedUsers);
 
       // Calculate stats
       const totalUsers = enrichedUsers.length;
       const totalVendors = enrichedUsers.filter(u => 
-        u.user_roles.some(r => r.role === 'vendor')
+        Array.isArray(u.user_roles) && u.user_roles.some(r => r.role === 'vendor')
       ).length;
       const totalCustomers = enrichedUsers.filter(u => 
-        u.user_roles.some(r => r.role === 'customer')
+        Array.isArray(u.user_roles) && u.user_roles.some(r => r.role === 'customer')
       ).length;
 
       setStats({
@@ -154,7 +169,7 @@ const AdminDashboard = () => {
           .from('user_roles')
           .insert({
             user_id: selectedUser.id,
-            role: editForm.role
+            role: editForm.role as 'admin' | 'vendor' | 'customer' | 'delivery_agent'
           });
 
         if (roleError) throw roleError;

@@ -61,6 +61,12 @@ const Navbar = () => {
                     Dashboard
                   </Button>
                 </Link>
+                <Link to="/profile">
+                  <Button variant="outline" size="sm">
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Button>
+                </Link>
                 <CartSheet />
                 <Button variant="ghost" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
@@ -119,6 +125,12 @@ const Navbar = () => {
                       <Button variant="outline" size="sm" className="justify-start w-full">
                         <LayoutDashboard className="h-4 w-4 mr-2" />
                         Dashboard
+                      </Button>
+                    </Link>
+                    <Link to="/profile" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" size="sm" className="justify-start w-full">
+                        <User className="h-4 w-4 mr-2" />
+                        Profile
                       </Button>
                     </Link>
                     <div className="px-2">

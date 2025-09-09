@@ -37,6 +37,7 @@ export const CartSheet = () => {
     setIsProcessingPayment(true);
 
     try {
+      console.log('Creating payment...');
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           items,
@@ -44,7 +45,8 @@ export const CartSheet = () => {
           currency: 'XAF', // Central African Franc for Campay
         },
       });
-
+      console.log(data);
+      console.log(error);
       if (error) throw error;
 
       if (data?.url) {

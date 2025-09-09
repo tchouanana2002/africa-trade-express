@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_analytics: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          metadata: Json | null
+          metric_name: string
+          metric_value: number
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          id?: string
+          metadata?: Json | null
+          metric_name: string
+          metric_value: number
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          metadata?: Json | null
+          metric_name?: string
+          metric_value?: number
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           amount: number
@@ -61,6 +115,7 @@ export type Database = {
           display_name: string | null
           first_name: string | null
           id: string
+          is_blocked: boolean | null
           last_name: string | null
           location: string | null
           phone: string | null
@@ -74,6 +129,7 @@ export type Database = {
           display_name?: string | null
           first_name?: string | null
           id?: string
+          is_blocked?: boolean | null
           last_name?: string | null
           location?: string | null
           phone?: string | null
@@ -87,6 +143,7 @@ export type Database = {
           display_name?: string | null
           first_name?: string | null
           id?: string
+          is_blocked?: boolean | null
           last_name?: string | null
           location?: string | null
           phone?: string | null

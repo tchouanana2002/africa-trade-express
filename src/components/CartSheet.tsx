@@ -8,14 +8,16 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { PaymentMethodDialog } from './PaymentMethodDialog';
 
 export const CartSheet = () => {
   const { items, removeFromCart, updateQuantity, clearCart, getTotalItems, getTotalPrice } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
-  const handleCheckout = async () => {
+  const handleInitiateCheckout = () => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -34,22 +36,52 @@ export const CartSheet = () => {
       return;
     }
 
+    setShowPaymentDialog(true);
+  };
+
+  const handlePaymentConfirm = async (method: 'card' | 'phone' | 'delivery', details: string) => {
     setIsProcessingPayment(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          items,
-          totalAmount: getTotalPrice(),
-          currency: 'XAF', // Central African Franc for Campay
-        },
-      });
+      if (method === 'delivery') {
+        // Handle pay on delivery - just create order without payment
+        const { data, error } = await supabase.functions.invoke('create-payment', {
+          body: {
+            items,
+            totalAmount: getTotalPrice(),
+            currency: 'XAF',
+            paymentMethod: 'delivery',
+          },
+        });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      if (data?.url) {
-        // Open Campay payment page in new tab
-        window.open(data.url, '_blank');
+        toast({
+          title: "Order Placed",
+          description: "Your order has been placed. You'll pay on delivery.",
+        });
+        
+        clearCart();
+        setShowPaymentDialog(false);
+      } else {
+        // Handle online payment (Campay)
+        const { data, error } = await supabase.functions.invoke('create-payment', {
+          body: {
+            items,
+            totalAmount: getTotalPrice(),
+            currency: 'XAF',
+            paymentMethod: method,
+            paymentDetails: details,
+          },
+        });
+
+        if (error) throw error;
+
+        if (data?.url) {
+          // Open Campay payment page in new tab
+          window.open(data.url, '_blank');
+          setShowPaymentDialog(false);
+        }
       }
     } catch (error) {
       console.error('Checkout error:', error);
@@ -167,18 +199,25 @@ export const CartSheet = () => {
                 </div>
 
                 <Button
-                  onClick={handleCheckout}
+                  onClick={handleInitiateCheckout}
                   disabled={isProcessingPayment}
                   className="w-full"
                   size="lg"
                 >
-                  {isProcessingPayment ? "Processing..." : "Checkout with Campay"}
+                  {isProcessingPayment ? "Processing..." : "Proceed to Payment"}
                 </Button>
               </div>
             </>
           )}
         </div>
       </SheetContent>
+
+      <PaymentMethodDialog
+        open={showPaymentDialog}
+        onOpenChange={setShowPaymentDialog}
+        onConfirm={handlePaymentConfirm}
+        isProcessing={isProcessingPayment}
+      />
     </Sheet>
   );
 };

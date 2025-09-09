@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Heart, ShoppingCart } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
 
 interface Product {
   id: number;
@@ -25,6 +26,19 @@ interface ProductGridProps {
 }
 
 const ProductGrid = ({ title, subtitle, products, showFilters = false, categories = [] }: ProductGridProps) => {
+  const { addToCart } = useCart();
+
+  const handleAddToCart = (product: Product) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      vendor: product.vendor,
+      category: product.category,
+    });
+  };
+
   return (
     <section className="py-16 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -131,7 +145,11 @@ const ProductGrid = ({ title, subtitle, products, showFilters = false, categorie
                   >
                     View Details
                   </Button>
-                  <Button size="sm" className="bg-secondary hover:bg-secondary/90">
+                  <Button 
+                    size="sm" 
+                    className="bg-secondary hover:bg-secondary/90"
+                    onClick={() => handleAddToCart(product)}
+                  >
                     <ShoppingCart className="h-4 w-4" />
                   </Button>
                 </div>

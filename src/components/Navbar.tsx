@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Search, Menu, User, ShoppingCart, LogOut, LayoutDashboard } from "lucide-react";
+import { Search, Menu, User, ShoppingCart, LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +7,7 @@ import { CartSheet } from "@/components/CartSheet";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -22,6 +23,7 @@ const Navbar = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+    setIsUserDropdownOpen(false);
   };
 
   return (
@@ -52,26 +54,50 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                <span className="text-sm text-muted-foreground">
-                  Welcome, {user.email}
-                </span>
-                <Link to="/dashboard">
-                  <Button variant="outline" size="sm">
-                    <LayoutDashboard className="h-4 w-4 mr-2" />
-                    Dashboard
-                  </Button>
-                </Link>
-                <Link to="/profile">
-                  <Button variant="outline" size="sm">
-                    <User className="h-4 w-4 mr-2" />
-                    Profile
-                  </Button>
-                </Link>
+                {/* User Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                    className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 px-3 py-2 rounded-md hover:bg-muted"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>{user.email}</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                  
+                  {/* Dropdown Menu */}
+                  {isUserDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg z-50">
+                      <div className="py-1">
+                        <Link
+                          to="/dashboard"
+                          className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors duration-200"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          <LayoutDashboard className="h-4 w-4 mr-3" />
+                          Dashboard
+                        </Link>
+                        <Link
+                          to="/profile"
+                          className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors duration-200"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                        >
+                          <User className="h-4 w-4 mr-3" />
+                          Profile
+                        </Link>
+                        <hr className="my-1 border-border" />
+                        <button
+                          onClick={handleSignOut}
+                          className="flex items-center w-full px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors duration-200"
+                        >
+                          <LogOut className="h-4 w-4 mr-3" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <CartSheet />
-                <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
-                </Button>
               </>
             ) : (
               <>

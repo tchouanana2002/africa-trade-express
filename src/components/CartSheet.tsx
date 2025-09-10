@@ -48,7 +48,7 @@ export const CartSheet = () => {
         const { data, error } = await supabase.functions.invoke('create-payment', {
           body: {
             items,
-            totalAmount: getTotalPrice(),
+            totalAmount: Math.round(getTotalPrice()),
             currency: 'XAF',
             paymentMethod: 'delivery',
           },
@@ -68,7 +68,7 @@ export const CartSheet = () => {
         const { data, error } = await supabase.functions.invoke('create-payment', {
           body: {
             items,
-            totalAmount: getTotalPrice(),
+            totalAmount: Math.round(getTotalPrice()),
             currency: 'XAF',
             paymentMethod: method,
             paymentDetails: details,

@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Heart, ShoppingCart } from "lucide-react";
+import { Star, Heart, ShoppingCart, MessageCircle } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useNavigate } from "react-router-dom";
 
 interface Product {
   id: number;
@@ -27,6 +28,7 @@ interface ProductGridProps {
 
 const ProductGrid = ({ title, subtitle, products, showFilters = false, categories = [] }: ProductGridProps) => {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   const handleAddToCart = (product: Product) => {
     addToCart({
@@ -144,6 +146,15 @@ const ProductGrid = ({ title, subtitle, products, showFilters = false, categorie
                     className="flex-1 hover:bg-primary hover:text-primary-foreground"
                   >
                     View Details
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => navigate(`/chat?productId=${product.id}&vendorId=vendor-${product.vendor}`)}
+                    className="hover:bg-primary hover:text-primary-foreground"
+                    title="Chat with seller"
+                  >
+                    <MessageCircle className="h-4 w-4" />
                   </Button>
                   <Button 
                     size="sm" 

@@ -11,6 +11,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithProvider: (provider: 'google' | 'facebook' | 'apple') => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
+  getUserId: () => string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -118,6 +119,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error };
   };
 
+  const getUserId = (): string | null => {
+    return user?.id || null;
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -127,8 +132,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       signIn,
       signInWithProvider,
       signOut,
+      getUserId,
     }}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

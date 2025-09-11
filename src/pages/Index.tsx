@@ -159,15 +159,15 @@ const Index = () => {
         <ProductGrid 
           title="Popular Products"
           subtitle="Discover the most loved products from verified vendors across Africa"
-          products={popularProducts}
+          limit={8}
         />
         
         <ProductGrid 
           title="Best Sellers"
           subtitle="Top-performing products by category with highest sales and customer satisfaction"
-          products={bestSellers}
           showFilters={true}
           categories={categories}
+          limit={4}
         />
         
         <AboutSection />

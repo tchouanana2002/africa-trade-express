@@ -1,45 +1,127 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Heart, ShoppingCart, MessageCircle } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Product {
   id: number;
   name: string;
-  price: string;
-  originalPrice?: string;
-  vendor: string;
-  rating: number;
-  reviews: number;
-  image: string;
-  badge?: string;
+  description: string;
+  price: number;
+  vendor_id: string;
   category: string;
+  stock: number;
+  images: string[];
+  is_active: boolean;
+  vendor_name?: string;
 }
 
 interface ProductGridProps {
   title: string;
   subtitle?: string;
-  products: Product[];
   showFilters?: boolean;
   categories?: string[];
+  limit?: number;
 }
 
-const ProductGrid = ({ title, subtitle, products, showFilters = false, categories = [] }: ProductGridProps) => {
+const ProductGrid = ({ title, subtitle, showFilters = false, categories = [], limit }: ProductGridProps) => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        await fetchProducts();
+      } catch (error) {
+        console.error('Error loading products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      let query = supabase
+        .from('products')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+        console.log("query",query);
+
+      if (limit) {
+        query = query.limit(limit);
+      }
+
+      const { data: productsData, error } = await query;
+
+      if (error) {
+        console.error('Error fetching products:', error);
+        return;
+      }
+
+      // Get vendor profiles separately
+      if (productsData?.length) {
+        const vendorIds = [...new Set(productsData.map(p => p.vendor_id))];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, display_name')
+          .in('user_id', vendorIds);
+
+        // Transform data to include vendor name
+        const productsWithVendor = productsData.map(product => ({
+          ...product,
+          vendor_name: profiles?.find(p => p.user_id === product.vendor_id)?.display_name || 'Unknown Vendor'
+        }));
+
+        setProducts(productsWithVendor);
+      } else {
+        setProducts([]);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, [limit]);
 
   const handleAddToCart = (product: Product) => {
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
-      image: product.image,
-      vendor: product.vendor,
+      price: `XAF ${product.price.toLocaleString()}`,
+      image: product.images[0] || '/placeholder.svg',
+      vendor: product.vendor_name || 'Unknown Vendor',
       category: product.category,
     });
   };
+
+  const handleChatWithVendor = (product: Product) => {
+    navigate(`/chat?productId=${product.id}&vendorId=${product.vendor_id}`);
+  };
+
+  if (loading) {
+    return (
+      <section className="py-16 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">Loading products...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 bg-muted/30">
@@ -81,13 +163,18 @@ const ProductGrid = ({ title, subtitle, products, showFilters = false, categorie
             <Card key={product.id} className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
               <div className="relative">
                 <img 
-                  src={product.image} 
+                  src={product.images[0] || '/placeholder.svg'} 
                   alt={product.name}
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                {product.badge && (
+                {product.stock < 10 && product.stock > 0 && (
                   <Badge className="absolute top-3 left-3 bg-secondary text-secondary-foreground">
-                    {product.badge}
+                    Low Stock
+                  </Badge>
+                )}
+                {product.stock === 0 && (
+                  <Badge className="absolute top-3 left-3 bg-destructive text-destructive-foreground">
+                    Out of Stock
                   </Badge>
                 )}
                 <Button 
@@ -105,36 +192,23 @@ const ProductGrid = ({ title, subtitle, products, showFilters = false, categorie
                     {product.name}
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    by {product.vendor}
+                    by {product.vendor_name}
                   </p>
                 </div>
 
-                {/* Rating */}
-                <div className="flex items-center gap-1 mb-3">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        className={`h-4 w-4 ${i < product.rating ? 'text-secondary fill-secondary' : 'text-muted-foreground'}`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    ({product.reviews})
-                  </span>
+                {/* Category */}
+                <div className="mb-3">
+                  <Badge variant="outline" className="text-xs">
+                    {product.category}
+                  </Badge>
                 </div>
 
                 {/* Price */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-lg font-bold text-primary">
-                      {product.price}
+                      XAF {product.price.toLocaleString()}
                     </span>
-                    {product.originalPrice && (
-                      <span className="text-sm text-muted-foreground line-through">
-                        {product.originalPrice}
-                      </span>
-                    )}
                   </div>
                 </div>
 
@@ -150,7 +224,7 @@ const ProductGrid = ({ title, subtitle, products, showFilters = false, categorie
                   <Button 
                     size="sm" 
                     variant="outline"
-                    onClick={() => navigate(`/chat?productId=${product.id}&vendorId=vendor-${product.vendor}`)}
+                    onClick={() => handleChatWithVendor(product)}
                     className="hover:bg-primary hover:text-primary-foreground"
                     title="Chat with seller"
                   >
@@ -160,6 +234,7 @@ const ProductGrid = ({ title, subtitle, products, showFilters = false, categorie
                     size="sm" 
                     className="bg-secondary hover:bg-secondary/90"
                     onClick={() => handleAddToCart(product)}
+                    disabled={product.stock === 0}
                   >
                     <ShoppingCart className="h-4 w-4" />
                   </Button>

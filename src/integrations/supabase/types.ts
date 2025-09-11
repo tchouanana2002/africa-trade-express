@@ -151,6 +151,7 @@ export type Database = {
           status: string | null
           updated_at: string
           user_id: string
+          vendor_id: string | null
         }
         Insert: {
           amount: number
@@ -163,6 +164,7 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id: string
+          vendor_id?: string | null
         }
         Update: {
           amount?: number
@@ -175,6 +177,49 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id?: string
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: number
+          images: string[] | null
+          is_active: boolean | null
+          name: string
+          price: number
+          stock: number | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: number
+          images?: string[] | null
+          is_active?: boolean | null
+          name: string
+          price: number
+          stock?: number | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: number
+          images?: string[] | null
+          is_active?: boolean | null
+          name?: string
+          price?: number
+          stock?: number | null
+          updated_at?: string
+          vendor_id?: string
         }
         Relationships: []
       }

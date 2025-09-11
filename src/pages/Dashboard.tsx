@@ -19,6 +19,7 @@ import AdminDashboard from '@/components/dashboards/AdminDashboard';
 import VendorDashboard from '@/components/dashboards/VendorDashboard';
 import CustomerDashboard from '@/components/dashboards/CustomerDashboard';
 import DeliveryDashboard from '@/components/dashboards/DeliveryDashboard';
+import Navbar from '@/components/Navbar';
 
 type UserRole = 'admin' | 'vendor' | 'customer' | 'delivery_agent';
 
@@ -128,17 +129,18 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-muted/30">
+      <Navbar/>
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">
+              {/* <h1 className="text-3xl font-bold text-foreground">
                 Welcome back, {profile?.display_name || user.email}
-              </h1>
-              <p className="text-muted-foreground mt-1">
+              </h1> */}
+              {/* <p className="text-muted-foreground mt-1">
                 Manage your AfriMarket experience
-              </p>
+              </p> */}
             </div>
             <Badge variant={getRoleColor(userRole)} className="flex items-center gap-2">
               {getRoleIcon(userRole)}

@@ -39,6 +39,7 @@ const ProductGrid = ({ title, subtitle, showFilters = false, categories = [], li
       try {
         setLoading(true);
         await fetchProducts();
+        console.log("products",products);
       } catch (error) {
         console.error('Error loading products:', error);
       } finally {
@@ -82,7 +83,7 @@ const ProductGrid = ({ title, subtitle, showFilters = false, categories = [], li
           ...product,
           vendor_name: profiles?.find(p => p.user_id === product.vendor_id)?.display_name || 'Unknown Vendor'
         }));
-
+        console.log("productsWithVendor",productsWithVendor);
         setProducts(productsWithVendor);
       } else {
         setProducts([]);
@@ -104,7 +105,7 @@ const ProductGrid = ({ title, subtitle, showFilters = false, categories = [], li
       name: product.name,
       price: `XAF ${product.price.toLocaleString()}`,
       image: product.images[0] || '/placeholder.svg',
-      vendor: product.vendor_name || 'Unknown Vendor',
+      vendor: product.vendor_id || 'Unknown Vendor',
       category: product.category,
     });
   };

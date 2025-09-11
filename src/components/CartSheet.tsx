@@ -159,9 +159,12 @@ export const CartSheet = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => navigate(`/chat?productId=${item.id}&vendorId=vendor-${item.vendor}`)}
+                            onClick={() => {
+                              console.log(item)
+                             return navigate(`/chat?productId=${item.id}&vendorId=${item.vendor}`)
+                            }}
                             className="h-6 w-6 p-0 text-primary hover:text-primary"
-                            title="Chat with seller"
+                            title={`Chat with seller`}
                           >
                             <MessageCircle className="h-3 w-3" />
                           </Button>

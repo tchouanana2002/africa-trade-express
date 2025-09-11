@@ -41,6 +41,8 @@ const Chat = () => {
     const productId = searchParams.get('productId');
     const vendorId = searchParams.get('vendorId');
 
+    console.log('productId', productId, 'vendorId', vendorId);
+
     if (productId && vendorId && user) {
       createOrFindConversation(parseInt(productId), vendorId).then((conversationId) => {
         if (conversationId) {
